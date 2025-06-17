@@ -1,0 +1,210 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    .container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin: -20px 0;
+        padding: 0 10px;
+        margin-left: 20px;
+        justify-items: center;
+    }
+
+    .settings-section {
+        background-color: #222;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        width: 800px;
+        position: relative;
+        top: 20px;
+        color: white;
+    }
+
+    .settings-section h3 {
+        color: white;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .settings-section h4 {
+        color: #bbb;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .setting-item {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .setting-item label {
+        flex: 0 0 200px;
+        color: #ddd;
+    }
+
+    .setting-item input[type="checkbox"] {
+        transform: scale(1.2);
+        cursor: pointer;
+    }
+
+    .setting-item input[type="email"],
+    .setting-item input[type="text"] {
+        padding: 8px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #333;
+        color: white;
+        width: 300px;
+    }
+
+    .setting-item select {
+        padding: 8px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #333;
+        color: white;
+        width: 150px;
+        cursor: pointer;
+    }
+
+    .setting-item button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .setting-item button:hover {
+        background-color: #1e88e5;
+    }
+
+    @media (max-width: 1024px) {
+        .container {
+            margin-left: 0;
+            padding: 10px;
+        }
+        .settings-section {
+            width: 100%;
+        }
+        .setting-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .setting-item label {
+            flex: none;
+        }
+        .setting-item input[type="email"],
+        .setting-item input[type="text"],
+        .setting-item select {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="settings-section">
+        <h3>{{ language['settings_title'] }}</h3>
+
+        <!-- Phần Alert & Notification -->
+        <h4>{{ language['alert_notification'] }}</h4>
+        <div class="setting-item">
+            <label for="sound_alert">{{ language['sound_alert'] }}:</label>
+            <input type="checkbox" id="sound_alert" name="sound_alert" {% if session.get('sound_alert', False) %}checked{% endif %}>
+        </div>
+        <div class="setting-item">
+            <label for="email_notif">{{ language['email_notif'] }}:</label>
+            <input type="email" id="email_notif" name="email_notif" value="{{ session.get('email_notif', 'user@example.com') }}">
+        </div>
+
+        <!-- Phần Camera & Video -->
+        <h4>{{ language['camera_video'] }}</h4>
+        <div class="setting-item">
+            <label for="auto_record">{{ language['auto_record'] }}:</label>
+            <input type="checkbox" id="auto_record" name="auto_record" {% if session.get('auto_record', False) %}checked{% endif %}>
+        </div>
+
+        <!-- Phần Account -->
+        <h4>{{ language['account'] }}</h4>
+        <div class="setting-item">
+            <label for="username">{{ language['username'] }}:</label>
+            <input type="text" id="username" name="username" value="{{ session.get('username', 'JohnDoe') }}" readonly>
+        </div>
+        <div class="setting-item">
+            <label>{{ language['change_password'] }}:</label>
+            <button onclick="changePassword()">{{ language['change_password'] }}</button>
+        </div>
+
+        <!-- Phần Language & Save Option -->
+        <h4>{{ language['language_save'] }}</h4>
+        <div class="setting-item">
+            <label for="language">{{ language['language'] }}:</label>
+            <select id="language" name="language">
+                <option value="english" {% if session.get('language', 'english') == 'english' %}selected{% endif %}>{{ language['english'] }}</option>
+                <option value="korean" {% if session.get('language') == 'korean' %}selected{% endif %}>{{ language['korean'] }}</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <label for="data_retention">{{ language['data_retention'] }}:</label>
+            <select id="data_retention" name="data_retention">
+                <option value="3" {% if session.get('data_retention') == '3' %}selected{% endif %}>{{ language['3_days'] }}</option>
+                <option value="7" {% if session.get('data_retention', '7') == '7' %}selected{% endif %}>{{ language['7_days'] }}</option>
+                <option value="30" {% if session.get('data_retention') == '30' %}selected{% endif %}>{{ language['30_days'] }}</option>
+            </select>
+        </div>
+
+        <!-- Nút Save -->
+        <div class="setting-item">
+            <button onclick="saveSettings()" style="width: 100%; background-color: #4caf50;">{{ language['save_settings'] }}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function saveSettings() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/settings';
+
+        const soundAlert = document.getElementById("sound_alert").checked;
+        const emailNotif = document.getElementById("email_notif").value;
+        const autoRecord = document.getElementById("auto_record").checked;
+        const language = document.getElementById("language").value;
+        const dataRetention = document.getElementById("data_retention").value;
+
+        const fields = {
+            'sound_alert': soundAlert,
+            'email_notif': emailNotif,
+            'auto_record': autoRecord,
+            'language': language,
+            'data_retention': dataRetention
+        };
+
+        for (const [name, value] of Object.entries(fields)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function changePassword() {
+        alert("{{ language['change_password_not_implemented'] }}");
+    }
+</script>
+
+{% endblock %}

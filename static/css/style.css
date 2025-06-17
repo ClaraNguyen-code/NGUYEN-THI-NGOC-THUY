@@ -1,0 +1,246 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: white;
+}
+
+.sidebar {
+    position: fixed;
+    width: 180px;
+    height: 100%;
+    background-color: #1e1e1e;
+    padding-top: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    color: orange;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar ul li a:hover {
+    background-color: #444;
+}
+
+.topbar {
+    margin-left: 180px;
+    padding: 15px;
+    background-color: #222;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+}
+
+.main {
+    margin-left: 180px;
+    padding: 20px;
+}
+
+.section-title {
+    text-align: center;
+    color: #2196f3;
+}
+
+.chart-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.chart-card {
+    background-color: white;
+    color: black;
+    border-radius: 10px;
+    padding: 15px;
+    width: 300px;
+}
+
+.chart-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px;
+    flex: 1 1 30%;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+/* Chuông thông báo */
+.notification-bell {
+    position: absolute;
+    top: 18px;
+    right: 30px;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+}
+
+.badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 6px;
+    font-size: 12px;
+}
+
+/* Dropdown */
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 30px;
+    background: white;
+    color: black;
+    width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    padding: 10px;
+}
+
+.notification-dropdown h4 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.notification-dropdown ul {
+    list-style: none;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.notification-dropdown ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.notification-dropdown button {
+    width: 100%;
+    background-color: #ff9800;
+    border: none;
+    padding: 6px;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+.size-select {
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #222;
+    color: white;
+    border: 1px solid #fff;
+    height: 34px;
+}
+
+.control-panel {
+    background-color: #222;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    height: 600px;
+}
+
+.control-panel label {
+    color: white;
+    display: block;
+    margin-bottom: 5px;
+}
+
+#camera-id {
+    width: 100%;
+    padding: 6px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    height: 34px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.button-group button {
+    flex: 1;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    height: 34px;
+    font-size: 14px;
+}
+
+.button-group button:hover {
+    filter: brightness(1.1);
+}
+
+.detection-buttons button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.detection-buttons button:hover {
+    filter: brightness(1.1);
+}
+
+#status-box {
+    width: 100%;
+    background: #1e1e1e;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    min-height: 60px;
+}
+
+.behavior-info {
+    margin-top: 20px;
+    background-color: #222;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    height: 120px;
+    overflow-y: auto;
+}
+
+.behavior-info h3 {
+    margin-top: 0;
+    color: #2196f3;
+}
+
+.behavior-list {
+    list-style: none;
+    padding: 0;
+}
+
+.behavior-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #444;
+}
+

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="{{ language['language'] == 'english' and 'en' or 'ko' }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ language['title'] }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+        }
+
+        .topbar {
+            background-color: #1c1c1c;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #ff9800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .topbar .topbar-content {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .topbar .title {
+            margin: 0;
+        }
+
+        .topbar .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+
+        .topbar .user-section a,
+        .topbar .user-section button {
+            color: white;
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+        }
+
+        .topbar .user-section button:hover,
+        .topbar .user-section a:hover {
+            color: #1e88e5;
+        }
+
+        .sidebar {
+            width: 180px;
+            height: 100vh;
+            background-color: #1e1e1e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 10px;
+        }
+
+        .welcome-text {
+            font-size: 18px;
+            position: absolute;
+            top: 6px;
+            left: -200px;
+        }
+
+        .sidebar h2 {
+            color: orange;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: #333;
+        }
+
+        .sidebar i {
+            margin-right: 10px;
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .main-display {
+            margin-left: 180px;
+            padding: 20px;
+            background-color: #111;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .notification-container {
+            position: absolute;
+            top: 20px;
+            right: 130px;
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+
+        .notif-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(150%);
+            right: 0;
+            background: white;
+            color: black;
+            width: 260px;
+            max-height: 350px;
+            border-radius: 6px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            padding: 10px;
+        }
+
+        .notif-dropdown h4 {
+            margin: 5px 0 10px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notif-list {
+            max-height: 220px;
+            overflow-y: auto;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .notif-item {
+            padding: 6px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .notif-dropdown button {
+            background: #ffc107;
+            color: black;
+            border: none;
+            padding: 6px 10px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* CSS cho thông báo ở giữa màn hình */
+        .hazard-alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ff4444;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2000;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .hazard-alert h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .hazard-alert p {
+            margin: 0 0 15px;
+            font-size: 16px;
+        }
+
+        .hazard-alert button {
+            background-color: #fff;
+            color: #ff4444;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .hazard-alert button:hover {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2><i class="fas fa-robot"></i> {{ language['sidebar_title'] }}</h2>
+    <a href="/dashboard"><i class="fas fa-home"></i>{{ language['dashboard'] }}</a>
+    <a href="/live_camera"><i class="fas fa-video"></i>{{ language['live_camera'] }}</a>
+    <a href="/upload_video"><i class="fas fa-upload"></i>{{ language['upload_video'] }}</a>
+    <a href="/event_history"><i class="fas fa-history"></i>{{ language['event_history'] }}</a>
+    <a href="/settings"><i class="fas fa-cog"></i>{{ language['settings'] }}</a>
+</div>
+
+<div class="topbar">
+    <div class="topbar-content">{{ language['title'] }}</div>
+    <div class="notification-container">
+        <i class="fas fa-bell" onclick="toggleNotifications()"></i>
+        <span id="notif-count" class="notif-badge">0</span>
+        <div id="notif-dropdown" class="notif-dropdown">
+            <h4>{{ language['notifications'] }}</h4>
+            <div id="notif-list" class="notif-list">
+                <div class="notif-item">{{ language['no_hazardous'] }}</div>
+            </div>
+            <button onclick="clearNotifications()">{{ language['clear_notifications'] }}</button>
+        </div>
+    </div>
+    <div class="user-section">
+        {% if session.get('username') %}
+            <span class="welcome-text">{{ language['welcome'] }}, {{ session.get('username') }}</span>
+            <form action="/logout" method="POST" style="display: inline;">
+                <button type="submit"><i class="fas fa-sign-out-alt"></i> {{ language['logout'] }}</button>
+            </form>
+        {% else %}
+            <a href="/login"><i class="fas fa-sign-in-alt"></i> {{ language['login'] }}</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="main-display">
+    <!-- Thêm div thông báo ở giữa màn hình -->
+    <div id="hazardAlert" class="hazard-alert">
+        <h3>{{ language['hazard_detected'] }}</h3>
+        <p id="hazardMessage"></p>
+        <button onclick="dismissAlert()">{{ language['dismiss'] }}</button>
+    </div>
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Thêm thẻ audio để phát âm thanh -->
+<audio id="alertSound" src="{{ url_for('static', filename='alert.mp3') }}" preload="auto" loop></audio>
+
+<script>
+    // Lấy trạng thái cài đặt thông báo âm thanh từ session
+    const soundAlertEnabled = {{ session.get('sound_alert', False) | tojson }};
+    const alertSound = document.getElementById("alertSound");
+    const hazardAlert = document.getElementById("hazardAlert");
+    const hazardMessage = document.getElementById("hazardMessage");
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById("notif-dropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    function clearNotifications() {
+        document.getElementById("notif-list").innerHTML = "<div class='notif-item'>{{ language['no_hazardous'] }}</div>";
+        document.getElementById("notif-count").textContent = "0";
+    }
+
+    // Hàm hiển thị thông báo và phát âm thanh
+    function showHazardAlert(message) {
+        hazardMessage.textContent = message;
+        hazardAlert.style.display = "block";
+        if (soundAlertEnabled) {
+            alertSound.play().catch(error => {
+                console.error("Error playing sound:", error);
+            });
+        }
+    }
+
+    // Hàm ẩn thông báo và dừng âm thanh
+    function dismissAlert() {
+        hazardAlert.style.display = "none";
+        alertSound.pause();
+        alertSound.currentTime = 0; // Reset âm thanh về đầu
+    }
+
+    // Giả lập: thêm 1 thông báo mỗi 7 giây
+    setInterval(() => {
+        const list = document.getElementById("notif-list");
+        const count = document.getElementById("notif-count");
+
+        const timestamp = new Date().toISOString().slice(0, 19).replace("T", " ");
+        const item = document.createElement("div");
+        item.className = "notif-item";
+        item.textContent = `{{ language['new_hazardous'] }} ${timestamp}`;
+        
+        if (list.innerText.includes("{{ language['no_hazardous'] }}")) list.innerHTML = "";
+        list.prepend(item);
+        count.textContent = parseInt(count.textContent) + 1;
+
+        // Hiển thị thông báo ở giữa màn hình
+        showHazardAlert(`{{ language['new_hazardous'] }} ${timestamp}`);
+    }, 7000000);
+</script>
+</body>
+</html>

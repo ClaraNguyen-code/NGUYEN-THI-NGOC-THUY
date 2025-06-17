@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="{{ language['language'] == 'english' and 'en' or 'ko' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ language['login'] }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .login-container .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .login-container .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+
+        .login-container .form-group input[type="text"],
+        .login-container .form-group input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .login-container .form-group input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        .login-container .form-group a {
+            color: #ff9800;
+            text-decoration: none;
+            float: right;
+        }
+
+        .login-container .form-group a:hover {
+            text-decoration: underline;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff9800;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .login-container button:hover {
+            background-color: #f57c00;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .or-line {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #ddd;
+        }
+
+        .or-line span {
+            padding: 0 10px;
+        }
+
+        .or-line hr {
+            flex: 1;
+            border: 0;
+            height: 1px;
+            background: #444;
+        }
+
+        .social-button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background-color: #ffffff;
+            color: #1e1e1e;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .social-button:hover {
+            background-color: #e0e0e0;
+            color: #1e1e1e;
+        }
+
+        .google-btn {
+        }
+
+        .microsoft-btn {
+        }
+
+        .signup-link {
+            margin-top: 20px;
+            color: #ff9800;
+        }
+
+        .signup-link a {
+            color: #ff9800;
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>{{ language['login'] }}</h2>
+        <div class="error-message" id="error-message"></div>
+        <form id="login-form" action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">{{ language['username_email'] }}:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">{{ language['password'] }}:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="remember">{{ language['remember_me'] }}
+                </label>
+                <a href="/signup">{{ language['forgot_password'] }}</a>
+            </div>
+            <button type="submit">{{ language['login'] }}</button>
+        </form>
+        <div class="or-line">
+            <hr>
+            <span>{{ language['or'] }}</span>
+            <hr>
+        </div>
+        <button class="social-button google-btn">
+            <i class="fab fa-google"></i> {{ language['continue_with_google'] }}
+        </button>
+        <button class="social-button microsoft-btn">
+            <i class="fab fa-windows"></i> {{ language['continue_with_microsoft'] }}
+        </button>
+        <div class="signup-link">
+            {{ language['dont_have_account'] }} <a href="/signup">{{ language['sign_up'] }}</a>
+        </div>
+
+        <script>
+            const errorMessage = document.getElementById("error-message");
+            {% if error %}
+                errorMessage.textContent = "{{ error }}";
+                errorMessage.style.display = "block";
+            {% endif %}
+        </script>
+    </body>
+</html>

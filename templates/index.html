@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+    <html lang="{{ lang }}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ _( 'Factory Worker Behavior Recognition', lang ) }}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background-color: #f5f7fa;
+                overflow: hidden;
+            }
+            .top-bar {
+                background-color: #ffffff;
+                height: 80px;
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding: 0 30px;
+            }
+            .top-bar .icon {
+                margin-left: 20px;
+                font-size: 2rem;
+                cursor: pointer;
+                position: relative;
+                transition: color 0.3s;
+            }
+            .top-bar .icon:hover {
+                color: #007bff;
+            }
+            .top-bar .badge {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background-color: #dc3545;
+                color: white;
+                border-radius: 50%;
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .notification-panel, .info-panel, .lang-panel {
+                position: absolute;
+                top: 80px;
+                right: 30px;
+                background-color: #ffffff;
+                border: 1px solid #ddd;
+                borderAround: 5px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                padding: 10px;
+                width: 150px;
+                display: none;
+                z-index: 1001;
+            }
+            .notification-panel.active, .info-panel.active, .lang-panel.active {
+                display: block;
+            }
+            .notification-panel h6, .info-panel h6 {
+                margin: 0 0 15px 0;
+                font-size: 1.1rem;
+            }
+            .notification-list {
+                max-height: 250px;
+                overflow-y: auto;
+            }
+            .notification-item {
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+            }
+            .lang-panel .lang-item {
+                padding: 8px;
+                cursor: pointer;
+                font-size: 0.95rem;
+            }
+            .lang-panel .lang-item:hover {
+                background-color: #f0f0f0;
+            }
+            .sidebar {
+                background-color: #E6F0FA;
+                width: 100px;
+                height: calc(100vh - 80px);
+                position: fixed;
+                top: 80px;
+                left: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding-top: 30px;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            }
+            .sidebar .icon {
+                margin: 25px 0;
+                font-size: 2.2rem;
+                color: #333;
+                cursor: pointer;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: color 0.3s;
+            }
+            .sidebar .icon:hover {
+                color: #007bff;
+            }
+            .sidebar .icon .label {
+                font-size: 0.9rem;
+                margin-top: 8px;
+                color: #333;
+                transition: color 0.3s;
+            }
+            .sidebar .icon:hover .label {
+                color: #007bff;
+            }
+            .camera-panel {
+                position: fixed;
+                top: 80px;
+                left: 100px;
+                background-color: #ffffff;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                width: 350px;
+                display: none;
+                z-index: 1000;
+            }
+            .camera-panel.active {
+                display: block;
+            }
+            .main-content {
+                margin-left: 100px;
+                margin-top: 80px;
+                padding: 30px;
+                height: calc(100vh - 80px);
+                overflow-y: auto;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                background-color: #f5f7fa;
+            }
+            .video-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
+                display: none;
+            }
+            .video-content.active {
+                display: flex;
+            }
+            .video-frame {
+                border: 3px solid #007bff;
+                border-radius: 12px;
+                padding: 10px;
+                background-color: #fff;
+                max-width: 960px;
+                max-height: 720px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .video-frame img, .video-frame video {
+                width: 100%;
+                height: auto;
+                object-fit: contain;
+            }
+            .dashboard-content, .logs-content, .offline-content {
+                display: none;
+                width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            .dashboard-content.active, .logs-content.active, .offline-content.active {
+                display: block;
+            }
+            .widget-card {
+                background-color: #fff;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                margin: 15px;
+                height: 100%;
+            }
+            .chart-container {
+                width: 100%;
+                height: 250px;
+            }
+            .dashboard-content .row:nth-child(3) {
+                margin-top: 50px;
+            }
+            .logs-table, .offline-table {
+                max-height: 350px;
+                overflow-y: auto;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+            }
+            .offline-container {
+                display: flex;
+                gap: 30px;
+                margin-bottom: 30px;
+            }
+            .dashboard-content h4, .video-content h4, .offline-content h4, .logs-content h4 {
+                font-size: 1.8rem;
+                color: #007bff;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .custom-file-upload {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .custom-file-upload span {
+                font-size: 0.9rem;
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Top bar -->
+        <div class="top-bar">
+            <div class="icon" onclick="toggleLanguage()">
+                <i class="fas fa-globe"></i>
+            </div>
+            <div class="icon" onclick="toggleInfo()">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="icon" onclick="toggleNotification()">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="notification-count">0</span>
+            </div>
+            {% if 'username' in session %}
+            <div class="icon" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            {% else %}
+            <div class="icon" onclick="window.location.href='/login'">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="lang-panel" id="lang-panel">
+            <div class="lang-item" onclick="changeLanguage('en')">{{ _( 'English', lang ) }}</div>
+            <div class="lang-item" onclick="changeLanguage('ko')">{{ _( 'Korean', lang ) }}</div>
+        </div>
+        <div class="notification-panel" id="notification-panel">
+            <h6>{{ _( 'Notifications', lang ) }}</h6>
+            <div class="notification-list" id="notification-list">
+                <p id="notification-message">{{ _( 'No hazardous behaviors detected', lang ) }}</p>
+            </div>
+            <button class="btn btn-warning btn-sm mt-2 w-100" onclick="clearNotifications()">{{ _( 'Clear Notifications', lang ) }}</button>
+        </div>
+        <div class="info-panel" id="info-panel">
+            <h6>{{ _( 'Information', lang ) }}</h6>
+            <p>{{ _( 'AI system developed by NGUYEN THI NGOC THUY', lang ) }}</p>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="icon" onclick="showDashboard()">
+                <i class="fas fa-home"></i>
+                <span class="label">{{ _( 'Dashboard', lang ) }}</span>
+            </div>
+            <div class="icon" onclick="toggleCamera()">
+                <i class="fas fa-camera"></i>
+                <span class="label">{{ _( 'Camera', lang ) }}</span>
+            </div>
+            <div class="icon" onclick="showLogs()">
+                <i class="fas fa-file-alt"></i>
+                <span class="label">{{ _( 'Logs', lang ) }}</span>
+            </div>
+            <div class="icon" onclick="showOffline()">
+                <i class="fas fa-video"></i>
+                <span class="label">{{ _( 'OffMode', lang ) }}</span>
+            </div>
+        </div>
+
+        <!-- Camera panel -->
+        <div class="camera-panel" id="camera-panel">
+            <h6>{{ _( 'Camera Control', lang ) }}</h6>
+            <div class="input-group mb-2">
+                <select class="form-select" id="webcam-index">
+                    <option value="0" selected>{{ _( 'Webcam ID 0', lang ) }}</option>
+                    <option value="1">{{ _( 'Webcam ID 1', lang ) }}</option>
+                    <option value="2">{{ _( 'Webcam ID 2', lang ) }}</option>
+                    <option value="3">{{ _( 'Webcam ID 3', lang ) }}</option>
+                </select>
+            </div>
+            <div class="input-group mb-2">
+                <select class="form-select" id="frame-size" onchange="updateFrameSize()">
+                    <option value="480x360">480x360</option>
+                    <option value="640x480">640x480</option>
+                    <option value="960x720" selected>960x720</option>
+                </select>
+            </div>
+            <button class="btn btn-success btn-sm mt-2 me-2" onclick="startWebcam()">{{ _( 'Start', lang ) }}</button>
+            <button class="btn btn-danger btn-sm mt-2" onclick="stopWebcam()">{{ _( 'Stop', lang ) }}</button>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <div class="video-content" id="video-content">
+                <h4>{{ _( 'Action Recognition via Camera', lang ) }}</h4>
+                <div class="video-frame" id="video-frame">
+                    <img src="{{ url_for('video_feed') }}" id="webcam-stream" alt="{{ _( 'Webcam Stream', lang ) }}">
+                </div>
+            </div>
+            <div class="dashboard-content" id="dashboard-content">
+                <h4>{{ _( 'Behavior Detection Dashboard', lang ) }}</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="widget-card">
+                            <h6>{{ _( "Today's Hazardous Behaviors", lang ) }}</h6>
+                            <p id="today-count">0</p>
+                            <div class="chart-container">
+                                <canvas id="today-pie-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="widget-card">
+                            <h6>{{ _( 'Hourly Hazardous Behaviors', lang ) }}</h6>
+                            <div class="chart-container">
+                                <canvas id="daily-line-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="widget-card">
+                            <h6>{{ _( 'Daily Hazardous Behaviors (30 Days)', lang ) }}</h6>
+                            <div class="chart-container">
+                                <canvas id="monthly-line-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="widget-card">
+                            <h6>{{ _( "Today's Behavior Types", lang ) }}</h6>
+                            <div class="chart-container">
+                                <canvas id="daily-bar-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="widget-card">
+                            <h6>{{ _( 'Monthly Behavior Types', lang ) }}</h6>
+                            <div class="chart-container">
+                                <canvas id="monthly-bar-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="logs-content" id="logs-content">
+                <h4>{{ _( 'Detection Logs', lang ) }}</h4>
+                <div class="widget-card">
+                    <h6>{{ _( 'Detection Logs', lang ) }}</h6>
+                    <div class="logs-table">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ _( 'Time', lang ) }}</th>
+                                    <th>{{ _( 'Behavior', lang ) }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detection-log">
+                                {% for detection in detections %}
+                                    <tr>
+                                        <td>{{ detection.time }}</td>
+                                        <td>{{ detection.action }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2 me-2" onclick="saveDetections()">{{ _( 'Save', lang ) }}</button>
+                    <button class="btn btn-warning btn-sm mt-2" onclick="clearDetections()">{{ _( 'Clear', lang ) }}</button>
+                </div>
+            </div>
+            <div class="offline-content" id="offline-content">
+                <h4>{{ _( 'Action Recognition via Pre-recorded Video', lang ) }}</h4>
+                <div class="input-group mb-3">
+                    <div class="custom-file-upload">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('videoFile').click()">{{ _( 'Choose File', lang ) }}</button>
+                        <input type="file" class="form-control" id="videoFile" accept="video/mp4,video/avi" style="display: none;">
+                        <span id="file-chosen">{{ _( 'No file chosen', lang ) }}</span>
+                    </div>
+                    <button class="btn btn-success btn-sm ms-2" onclick="uploadVideo()">{{ _( 'Upload Video', lang ) }}</button>
+                    <button class="btn btn-primary btn-sm ms-2" onclick="predictVideo()">{{ _( 'Predict Behavior', lang ) }}</button>
+                </div>
+                <div class="offline-container">
+                    <div class="col-md-6">
+                        <div class="video-frame">
+                            <video id="uploadedVideo" controls style="display: none;"></video>
+                        </div>
+                        <div class="offline-table mt-3">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _( 'Time', lang ) }}</th>
+                                        <th>{{ _( 'Behavior', lang ) }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="video-detection-log">
+                                    {% for detection in video_detections %}
+                                        <tr>
+                                            <td>{{ detection.time }}</td>
+                                            <td>{{ detection.action }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-2 me-2" onclick="saveVideoDetections()">{{ _( 'Save', lang ) }}</button>
+                        <button class="btn btn-warning btn-sm mt-2" onclick="clearVideoDetections()">{{ _( 'Clear', lang ) }}</button>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="video-frame">
+                            <img src="{{ url_for('video_predict_feed') }}" id="predict-stream" alt="{{ _( 'Prediction Stream', lang ) }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            let webcamOn = false;
+            let videoUploaded = false;
+            let isPredicting = false;
+            let dailyLineChart, monthlyLineChart, dailyBarChart, monthlyBarChart, todayPieChart;
+
+            function initCharts() {
+                const pieCtx = document.getElementById('today-pie-chart').getContext('2d');
+                todayPieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['{{ _( 'Falling', lang ) }}', '{{ _( 'Punching', lang ) }}', '{{ _( 'Kicking', lang ) }}'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            title: { display: true, text: '{{ _( 'Behavior Distribution', lang ) }}' }
+                        }
+                    }
+                });
+
+                const dailyLineCtx = document.getElementById('daily-line-chart').getContext('2d');
+                dailyLineChart = new Chart(dailyLineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                        datasets: [{
+                            label: '{{ _( 'Hazardous Behaviors', lang ) }}',
+                            data: Array(24).fill(0),
+                            borderColor: '#007bff',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: '{{ _( 'Count', lang ) }}' } },
+                            x: { title: { display: true, text: '{{ _( 'Hour', lang ) }}' } }
+                        }
+                    }
+                });
+
+                const monthlyLineCtx = document.getElementById('monthly-line-chart').getContext('2d');
+                monthlyLineChart = new Chart(monthlyLineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 30}, (_, i) => `{{ _( 'Day', lang ) }} ${i+1}`),
+                        datasets: [{
+                            label: '{{ _( 'Hazardous Behaviors', lang ) }}',
+                            data: Array(30).fill(0),
+                            borderColor: '#28a745',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: '{{ _( 'Count', lang ) }}' } },
+                            x: { title: { display: true, text: '{{ _( 'Day', lang ) }}' } }
+                        }
+                    }
+                });
+
+                const dailyBarCtx = document.getElementById('daily-bar-chart').getContext('2d');
+                dailyBarChart = new Chart(dailyBarCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['{{ _( 'Falling', lang ) }}', '{{ _( 'Punching', lang ) }}', '{{ _( 'Kicking', lang ) }}'],
+                        datasets: [{
+                            label: '{{ _( 'Count', lang ) }}',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: '{{ _( 'Count', lang ) }}' } },
+                            x: { title: { display: true, text: '{{ _( 'Behavior', lang ) }}' } }
+                        }
+                    }
+                });
+
+                const monthlyBarCtx = document.getElementById('monthly-bar-chart').getContext('2d');
+                monthlyBarChart = new Chart(monthlyBarCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['{{ _( 'Falling', lang ) }}', '{{ _( 'Punching', lang ) }}', '{{ _( 'Kicking', lang ) }}'],
+                        datasets: [{
+                            label: '{{ _( 'Count', lang ) }}',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: '{{ _( 'Count', lang ) }}' } },
+                            x: { title: { display: true, text: '{{ _( 'Behavior', lang ) }}' } }
+                        }
+                    }
+                });
+            }
+
+            function toggleLanguage() {
+                const panel = document.getElementById('lang-panel');
+                panel.classList.toggle('active');
+                document.getElementById('notification-panel').classList.remove('active');
+                document.getElementById('info-panel').classList.remove('active');
+            }
+
+            function changeLanguage(lang) {
+                fetch('/set_language?lang=' + lang)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            window.location.reload();
+                        }
+                    });
+            }
+
+            function toggleNotification() {
+                const panel = document.getElementById('notification-panel');
+                panel.classList.toggle('active');
+                document.getElementById('info-panel').classList.remove('active');
+                document.getElementById('lang-panel').classList.remove('active');
+            }
+
+            function toggleInfo() {
+                const panel = document.getElementById('info-panel');
+                panel.classList.toggle('active');
+                document.getElementById('notification-panel').classList.remove('active');
+                document.getElementById('lang-panel').classList.remove('active');
+            }
+
+            function toggleCamera() {
+                const panel = document.getElementById('camera-panel');
+                panel.classList.toggle('active');
+                showVideo();
+            }
+
+            function showDashboard() {
+                document.getElementById('video-content').classList.remove('active');
+                document.getElementById('dashboard-content').classList.add('active');
+                document.getElementById('logs-content').classList.remove('active');
+                document.getElementById('offline-content').classList.remove('active');
+                document.getElementById('camera-panel').classList.remove('active');
+                updateDashboard();
+            }
+
+            function showVideo() {
+                document.getElementById('video-content').classList.add('active');
+                document.getElementById('dashboard-content').classList.remove('active');
+                document.getElementById('logs-content').classList.remove('active');
+                document.getElementById('offline-content').classList.remove('active');
+            }
+
+            function showLogs() {
+                document.getElementById('video-content').classList.remove('active');
+                document.getElementById('dashboard-content').classList.remove('active');
+                document.getElementById('logs-content').classList.add('active');
+                document.getElementById('offline-content').classList.remove('active');
+                document.getElementById('camera-panel').classList.remove('active');
+                updateDetectionLog();
+            }
+
+            function showOffline() {
+                document.getElementById('video-content').classList.remove('active');
+                document.getElementById('dashboard-content').classList.remove('active');
+                document.getElementById('logs-content').classList.remove('active');
+                document.getElementById('offline-content').classList.add('active');
+                document.getElementById('camera-panel').classList.remove('active');
+                updateVideoDetectionLog();
+            }
+
+            function updateFrameSize() {
+                const frameSize = document.getElementById('frame-size').value.split('x');
+                const width = parseInt(frameSize[0]);
+                const height = parseInt(frameSize[1]);
+                const frame = document.getElementById('video-frame');
+                const stream = document.getElementById('webcam-stream');
+                frame.style.maxWidth = (width + 20) + 'px';
+                frame.style.maxHeight = (height + 20) + 'px';
+                stream.style.width = width + 'px';
+                stream.style.height = height + 'px';
+                fetch('/set_frame_size', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ width: width, height: height })
+                });
+            }
+
+            function startWebcam() {
+                showVideo();
+                const webcamIndex = document.getElementById('webcam-index').value;
+                fetch('/start_webcam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index: webcamIndex })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    webcamOn = data.status;
+                    if (webcamOn) {
+                        document.getElementById('webcam-stream').src = '/video_feed?t=' + new Date().getTime();
+                    }
+                    updateDetectionLog();
+                });
+            }
+
+            function stopWebcam() {
+                fetch('/stop_webcam', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        webcamOn = data.status;
+                        document.getElementById('webcam-stream').src = '/video_feed';
+                        updateDetectionLog();
+                    });
+            }
+
+            function logout() {
+                fetch('/logout', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            window.location.href = '/login';
+                        }
+                    });
+            }
+
+            function updateDetectionLog() {
+                fetch('/get_detections')
+                    .then(response => response.json())
+                    .then(data => {
+                        const log = document.getElementById('detection-log');
+                        log.innerHTML = '';
+                        data.detections.forEach(detection => {
+                            log.innerHTML += `
+                                <tr>
+                                    <td>${detection.time}</td>
+                                    <td>${detection.action}</td>
+                                </tr>`;
+                        });
+                        updateNotifications();
+                    });
+            }
+
+            function updateVideoDetectionLog() {
+                fetch('/get_video_detections')
+                    .then(response => response.json())
+                    .then(data => {
+                        const log = document.getElementById('video-detection-log');
+                        log.innerHTML = '';
+                        data.detections.forEach(detection => {
+                            log.innerHTML += `
+                                <tr>
+                                    <td>${detection.time}</td>
+                                    <td>${detection.action}</td>
+                                </tr>`;
+                        });
+                        updateNotifications();
+                    });
+            }
+
+            function updateNotifications() {
+                fetch('/get_notifications')
+                    .then(response => response.json())
+                    .then(data => {
+                        const list = document.getElementById('notification-list');
+                        const count = document.getElementById('notification-count');
+                        list.innerHTML = '';
+                        if (data.notifications.length > 0) {
+                            data.notifications.forEach(note => {
+                                list.innerHTML += `<div class="notification-item">{{ _( 'New hazardous behavior detected!', lang ) }} ${note.behavior} {{ _( 'at', lang ) }} ${note.time}</div>`;
+                            });
+                        } else {
+                            list.innerHTML = '<p id="notification-message">{{ _( 'No hazardous behaviors detected', lang ) }}</p>';
+                        }
+                        count.textContent = data.notifications.length;
+                    });
+            }
+
+            function clearNotifications() {
+                fetch('/clear_notifications', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            updateNotifications();
+                        }
+                    });
+            }
+
+            function updateDashboard() {
+                fetch('/get_dashboard_stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('today-count').textContent = data.today_count;
+                        todayPieChart.data.datasets[0].data = [
+                            data.today_behavior_counts.Falling || 0,
+                            data.today_behavior_counts.Punching || 0,
+                            data.today_behavior_counts.Kicking || 0
+                        ];
+                        todayPieChart.update();
+                        dailyLineChart.data.datasets[0].data = data.daily_counts;
+                        dailyLineChart.update();
+                        monthlyLineChart.data.datasets[0].data = data.monthly_counts;
+                        monthlyLineChart.update();
+                        dailyBarChart.data.datasets[0].data = [
+                            data.daily_behavior_counts.Falling || 0,
+                            data.daily_behavior_counts.Punching || 0,
+                            data.daily_behavior_counts.Kicking || 0
+                        ];
+                        dailyBarChart.update();
+                        monthlyBarChart.data.datasets[0].data = [
+                            data.monthly_behavior_counts.Falling || 0,
+                            data.monthly_behavior_counts.Punching || 0,
+                            data.monthly_behavior_counts.Kicking || 0
+                        ];
+                        monthlyBarChart.update();
+                    });
+            }
+
+            function saveDetections() {
+                fetch('/save_detections')
+                    .then(response => {
+                        if (!response.ok) throw new Error('{{ _( 'Failed to save file', lang ) }}');
+                        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1] || 'detections.xlsx';
+                        return response.blob().then(blob => ({ blob, filename }));
+                    })
+                    .then(({ blob, filename }) => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(error => alert(error.message));
+            }
+
+            function saveVideoDetections() {
+                fetch('/save_video_detections')
+                    .then(response => {
+                        if (!response.ok) throw new Error('{{ _( 'Failed to save file', lang ) }}');
+                        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1] || 'video_detections.xlsx';
+                        return response.blob().then(blob => ({ blob, filename }));
+                    })
+                    .then(({ blob, filename }) => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(error => alert(error.message));
+            }
+
+            function clearDetections() {
+                fetch('/clear_detections', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            updateDetectionLog();
+                            updateDashboard();
+                        }
+                    });
+            }
+
+            function uploadVideo() {
+                const fileInput = document.getElementById('videoFile');
+                const video = document.getElementById('uploadedVideo');
+                const file = fileInput.files[0];
+                if (file) {
+                    if (!file.type.match('video/mp4') && !file.type.match('video/avi')) {
+                        alert("{{ _( 'Please upload a .mp4 or .avi video', lang ) }}");
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('video', file);
+                    fetch('/upload_video', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            const blobUrl = URL.createObjectURL(file);
+                            video.src = blobUrl;
+                            video.style.display = 'block';
+                            videoUploaded = true;
+                        }
+                    });
+                }
+            }
+
+            function predictVideo() {
+                if (!videoUploaded) {
+                    alert("{{ _( 'Please upload a video first', lang ) }}");
+                    return;
+                }
+                isPredicting = true;
+                fetch('/predict_video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById('predict-stream').src = '/video_predict_feed?t=' + new Date().getTime();
+                        setInterval(updateVideoProgress, 500);
+                    }
+                });
+            }
+
+            function updateVideoProgress() {
+                if (!isPredicting) return;
+                fetch('/get_video_predict_progress')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.progress >= 100) {
+                            isPredicting = false;
+                        }
+                    });
+            }
+
+            function clearVideoDetections() {
+                isPredicting = false;
+                fetch('/clear_video_detections', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            updateVideoDetectionLog();
+                            document.getElementById('uploadedVideo').style.display = 'none';
+                            document.getElementById('uploadedVideo').src = '';
+                            document.getElementById('predict-stream').src = '/video_predict_feed';
+                            videoUploaded = false;
+                            document.getElementById('file-chosen').textContent = '{{ _( 'No file chosen', lang ) }}';
+                        }
+                    });
+            }
+
+            document.getElementById('videoFile').addEventListener('change', function() {
+                const fileChosen = document.getElementById('file-chosen');
+                fileChosen.textContent = this.files.length > 0 ? this.files[0].name : '{{ _( 'No file chosen', lang ) }}';
+            });
+
+            window.onload = () => {
+                updateFrameSize();
+                initCharts();
+                showDashboard();
+                setInterval(updateDetectionLog, 1000);
+                setInterval(updateVideoDetectionLog, 1000);
+            };
+        </script>
+    </body>
+    </html>

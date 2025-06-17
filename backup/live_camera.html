@@ -1,0 +1,389 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 40px;
+        margin: 30px 0;
+        padding: 0 20px;
+        margin-left: 180px;
+    }
+
+    .video-section {
+        position: relative;
+        top: -55px;
+        left: -150px;
+    }
+
+    .video-section h3 {
+        color: white;
+        text-align: left;
+        margin-left: 50px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #video-stream {
+        width: 768px;
+        height: 576px;
+        border: 2px solid white;
+        background-color: black;
+        transition: opacity 0.5s;
+        max-width: calc(100vw - 280px);
+        max-height: 80vh;
+        object-fit: contain;
+        left: -40;
+    }
+
+    #video-stream.loading {
+        opacity: 0.5;
+    }
+
+    #video-stream.loaded {
+        opacity: 1;
+    }
+
+    .size-select {
+        padding: 5px;
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+        border: 1px solid #fff;
+        height: 34px;
+    }
+
+    .control-panel {
+        background-color: #222;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        height: 550px;
+        position: relative;
+        top: 0px;
+        left: -100px;
+    }
+
+    .control-panel label {
+        color: white;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    #camera-id {
+        width: 100px;
+        padding: 6px;
+        margin-bottom: 0;
+        border-radius: 5px;
+        height: 34px;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    .button-group button {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        height: 34px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .button-group button:hover {
+        filter: brightness(1.1);
+    }
+
+    .detection-buttons button {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .detection-buttons button:hover {
+        filter: brightness(1.1);
+    }
+
+    #status-box {
+        width: 100%;
+        background: #1e1e1e;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        min-height: 60px;
+        font-size: 14px;
+    }
+
+    .behavior-info {
+        margin-top: 20px;
+        background-color: #222;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        height: 120px;
+        overflow-y: auto;
+    }
+
+    .behavior-info h3 {
+        margin-top: 0;
+        color: #2196f3;
+        font-size: 16px;
+    }
+
+    .behavior-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .behavior-list li {
+        padding: 5px 0;
+        border-bottom: 1px solid #444;
+        font-size: 14px;
+    }
+
+    @media (max-width: 1024px) {
+        .container {
+            grid-template-columns: 1fr;
+            margin-left: 0;
+            padding: 10px;
+        }
+        .control-panel {
+            width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+        #video-stream {
+            width: 100%;
+            height: auto;
+            max-width: calc(100vw - 20px);
+            max-height: 50vh;
+        }
+        .button-group button {
+            font-size: 11px;
+        }
+        .detection-buttons button {
+            font-size: 13px;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="video-section">
+        <h3>{{ language['camera_display'] }}
+            <select id="size-select" class="size-select" onchange="changeSize()">
+                <option value="704x528">704x528</option>
+                <option value="768x576">768x576</option>
+                <option value="832x624">832x624</option>
+            </select>
+        </h3>
+        <img id="video-stream" src="{{ url_for('video_feed') }}" alt="Camera Display" class="loading">
+    </div>
+    <div class="control-panel">
+        <label>{{ language['select'] }}:</label>
+        <div class="button-group">
+            <select id="camera-id" class="form-select" onchange="checkCameraAvailability()">
+                <option value="0">{{ language['camera_id'] }} 0</option>
+                <option value="1">{{ language['camera_id'] }} 1</option>
+            </select>
+            <button onclick="selectCamera()">{{ language['select'] }}</button>
+            <button onclick="refreshFeed()">{{ language['refresh'] }}</button>
+        </div>
+        <div class="button-group">
+            <button id="on-camera" class="btn-inactive">{{ language['on_camera'] }}</button>
+            <button id="off-camera" class="btn-inactive">{{ language['off_camera'] }}</button>
+        </div>
+        <div class="detection-buttons">
+            <label>{{ language['detection_controls'] }}:</label>
+            <button id="start-detection" class="btn-success" onclick="startDetection()">{{ language['start_detection'] }}</button>
+            <button id="stop-detection" class="btn-danger" onclick="stopDetection()">{{ language['stop_detection'] }}</button>
+        </div>
+        <label>{{ language['status'] }}:</label>
+        <div id="status-box">{{ language['no_camera_or_detection'] }}</div>
+        <div class="behavior-info">
+            <h3>{{ language['detected_behaviors'] }}</h3>
+            <ul class="behavior-list" id="behaviorList">
+                <li>{{ language['falling'] }}: 0 ({{ language['last_detected'] }}: N/A)</li>
+                <li>{{ language['lay_down'] }}: 0 ({{ language['last_detected'] }}: N/A)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const onBtn = document.getElementById("on-camera");
+    const offBtn = document.getElementById("off-camera");
+    const startDetectionBtn = document.getElementById("start-detection");
+    const stopDetectionBtn = document.getElementById("stop-detection");
+    const videoStream = document.getElementById("video-stream");
+    const statusBox = document.getElementById("status-box");
+    const behaviorList = document.getElementById("behaviorList");
+    let cameraRunning = false;
+    let detectionRunning = false;
+    let currentCameraId = 0;
+
+    function checkCameraAvailability() {
+        const cameraId = document.getElementById("camera-id").value;
+        const isCameraAvailable = cameraId !== "1";
+
+        if (!isCameraAvailable) {
+            statusBox.innerText = `{{ language['camera_id'] }} ${cameraId} {{ language['is_not_available_now'] }}`;
+            onBtn.disabled = true;
+        } else {
+            statusBox.innerText = "{{ language['no_camera_or_detection'] }}";
+            onBtn.disabled = false;
+        }
+    }
+
+    window.onload = function () {
+        checkCameraAvailability();
+    };
+
+    function changeSize() {
+        const [width, height] = document.getElementById("size-select").value.split("x");
+        videoStream.style.width = `${width}px`;
+        videoStream.style.height = `${height}px`;
+        if (cameraRunning) {
+            videoStream.src = "{{ url_for('video_feed') }}?t=" + new Date().getTime();
+        }
+    }
+
+    onBtn.onclick = function () {
+        if (!cameraRunning) {
+            const id = document.getElementById("camera-id").value;
+            currentCameraId = id;
+
+            const isCameraAvailable = id !== "1";
+            if (!isCameraAvailable) {
+                statusBox.innerText = `{{ language['camera_id'] }} ${id} {{ language['is_not_available_now'] }}`;
+                return;
+            }
+
+            fetch("/start_webcam", {
+                method: "POST",
+                body: new URLSearchParams({ camera_id: id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_off'] }}`;
+                    videoStream.src = "{{ url_for('video_feed') }}?t=" + new Date().getTime();
+                    videoStream.classList.remove("loading");
+                    videoStream.classList.add("loaded");
+                    cameraRunning = true;
+                    onBtn.classList.add("btn-active");
+                    offBtn.classList.remove("btn-danger-active");
+                    offBtn.classList.add("btn-inactive");
+                } else {
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_not_available_now'] }}`;
+                }
+            });
+        }
+    };
+
+    offBtn.onclick = function () {
+        if (cameraRunning) {
+            fetch("/stop_webcam", { method: "POST" })
+            .then(() => {
+                statusBox.innerText = `{{ language['camera_id'] }} {{ language['is_off'] }}, {{ language['detection_is_off'] }}`;
+                videoStream.src = "";
+                videoStream.classList.remove("loaded");
+                videoStream.classList.add("loading");
+                cameraRunning = false;
+                if (detectionRunning) stopDetection();
+                offBtn.classList.add("btn-danger-active");
+                onBtn.classList.remove("btn-active");
+                onBtn.classList.add("btn-inactive");
+            });
+        }
+    };
+
+    function selectCamera() {
+        if (cameraRunning) {
+            offBtn.click();
+        }
+        const id = document.getElementById("camera-id").value;
+        currentCameraId = id;
+        checkCameraAvailability();
+        setTimeout(() => {
+            if (!onBtn.disabled) onBtn.click();
+        }, 500);
+    }
+
+    function refreshFeed() {
+        if (cameraRunning) {
+            statusBox.innerText = `{{ language['refreshing_camera'] }} ${currentCameraId} {{ language['feed'] }}...`;
+            videoStream.src = "{{ url_for('video_feed') }}?t=" + new Date().getTime();
+            setTimeout(() => {
+                if (detectionRunning) {
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_on'] }}`;
+                } else {
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_off'] }}`;
+                }
+            }, 1000);
+        }
+    }
+
+    function startDetection() {
+        if (cameraRunning && !detectionRunning) {
+            fetch("/start_detection", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    detectionRunning = true;
+                    startDetectionBtn.classList.add("btn-active");
+                    stopDetectionBtn.classList.remove("btn-danger-active");
+                    stopDetectionBtn.classList.add("btn-inactive");
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_starting'] }}...`;
+                    setTimeout(() => {
+                        statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_on'] }}`;
+                    }, 1000);
+                }
+            });
+        }
+    }
+
+    function stopDetection() {
+        if (detectionRunning) {
+            fetch("/stop_detection", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    detectionRunning = false;
+                    stopDetectionBtn.classList.add("btn-danger-active");
+                    startDetectionBtn.classList.remove("btn-active");
+                    startDetectionBtn.classList.add("btn-inactive");
+                    statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_stopping'] }}...`;
+                    setTimeout(() => {
+                        statusBox.innerText = `{{ language['camera_id'] }} ${currentCameraId} {{ language['is_on'] }}, {{ language['detection_is_off'] }}`;
+                        behaviorList.innerHTML = `
+                            <li>{{ language['falling'] }}: 0 ({{ language['last_detected'] }}: N/A)</li>
+                            <li>{{ language['lay_down'] }}: 0 ({{ language['last_detected'] }}: N/A)</li>
+                        `;
+                        dismissAlert();
+                    }, 1000);
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

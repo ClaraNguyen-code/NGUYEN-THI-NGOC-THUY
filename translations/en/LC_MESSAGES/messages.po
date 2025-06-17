@@ -1,0 +1,183 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-30 12:00+0000\n"
+"PO-Revision-Date: 2025-04-30 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Factory Worker Behavior Recognition"
+msgstr "Factory Worker Behavior Recognition"
+
+msgid "English"
+msgstr "English"
+
+msgid "Korean"
+msgstr "Korean"
+
+msgid "Notifications"
+msgstr "Notifications"
+
+msgid "No hazardous behaviors detected"
+msgstr "No hazardous behaviors detected"
+
+msgid "Clear Notifications"
+msgstr "Clear Notifications"
+
+msgid "Information"
+msgstr "Information"
+
+msgid "AI system developed by NGUYEN THI NGOC THUY"
+msgstr "AI system developed by NGUYEN THI NGOC THUY"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Camera"
+msgstr "Camera"
+
+msgid "Logs"
+msgstr "Logs"
+
+msgid "OffMode"
+msgstr "Offline Mode"
+
+msgid "Camera Control"
+msgstr "Camera Control"
+
+msgid "Webcam ID 0"
+msgstr "Webcam ID 0"
+
+msgid "Webcam ID 1"
+msgstr "Webcam ID 1"
+
+msgid "Webcam ID 2"
+msgstr "Webcam ID 2"
+
+msgid "Webcam ID 3"
+msgstr "Webcam ID 3"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Stop"
+msgstr "Stop"
+
+msgid "Action Recognition via Camera"
+msgstr "Action Recognition via Camera"
+
+msgid "Webcam Stream"
+msgstr "Webcam Stream"
+
+msgid "Behavior Detection Dashboard"
+msgstr "Behavior Detection Dashboard"
+
+msgid "Today's Hazardous Behaviors"
+msgstr "Today's Hazardous Behaviors"
+
+msgid "Hourly Hazardous Behaviors"
+msgstr "Hourly Hazardous Behaviors"
+
+msgid "Daily Hazardous Behaviors (30 Days)"
+msgstr "Daily Hazardous Behaviors (30 Days)"
+
+msgid "Today's Behavior Types"
+msgstr "Today's Behavior Types"
+
+msgid "Monthly Behavior Types"
+msgstr "Monthly Behavior Types"
+
+msgid "Detection Logs"
+msgstr "Detection Logs"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "Behavior"
+msgstr "Behavior"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Clear"
+msgstr "Clear"
+
+msgid "Action Recognition via Pre-recorded Video"
+msgstr "Action Recognition via Pre-recorded Video"
+
+msgid "Choose File"
+msgstr "Choose File"
+
+msgid "No file chosen"
+msgstr "No file chosen"
+
+msgid "Upload Video"
+msgstr "Upload Video"
+
+msgid "Predict Behavior"
+msgstr "Predict Behavior"
+
+msgid "Prediction Stream"
+msgstr "Prediction Stream"
+
+msgid "No Connection"
+msgstr "No Connection"
+
+msgid "No Prediction"
+msgstr "No Prediction"
+
+msgid "New hazardous behavior detected!"
+msgstr "New hazardous behavior detected!"
+
+msgid "at"
+msgstr "at"
+
+msgid "Falling"
+msgstr "Falling"
+
+msgid "Punching"
+msgstr "Punching"
+
+msgid "Kicking"
+msgstr "Kicking"
+
+msgid "Behavior Distribution"
+msgstr "Behavior Distribution"
+
+msgid "Hazardous Behaviors"
+msgstr "Hazardous Behaviors"
+
+msgid "Count"
+msgstr "Count"
+
+msgid "Hour"
+msgstr "Hour"
+
+msgid "Day"
+msgstr "Day"
+
+msgid "Failed to save file"
+msgstr "Failed to save file"
+
+msgid "Please upload a .mp4 or .avi video"
+msgstr "Please upload a .mp4 or .avi video"
+
+msgid "Please upload a video first"
+msgstr "Please upload a video first"
+
+msgid "No video file uploaded"
+msgstr "No video file uploaded"
+
+msgid "No video file selected"
+msgstr "No video file selected"
+
+msgid "Invalid file format"
+msgstr "Invalid file format"
+
+msgid "Webcam ID %s not available"
+msgstr "Webcam ID %s not available"

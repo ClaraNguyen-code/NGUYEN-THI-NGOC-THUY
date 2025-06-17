@@ -1,0 +1,262 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style>
+    .container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin: -70px 0;
+        padding: 0 10px;
+        margin-left: 20px;
+        justify-items: center;
+    }
+
+    .video-section {
+        text-align: center;
+        display: none;
+    }
+
+    .video-section h3 {
+        color: white;
+        text-align: left;
+        margin-left: 50px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .upload-controls {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: 50px;
+    }
+
+    .upload-controls input[type="file"] {
+        color: white;
+    }
+
+    .upload-controls button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        background-color: #2196f3;
+        color: white;
+    }
+
+    .upload-controls button:hover {
+        background-color: #1e88e5;
+    }
+
+    #detected-video {
+        width: 768px;
+        height: 576px;
+        border: 2px solid white;
+        background-color: black;
+        transition: opacity 0.5s;
+        max-width: calc(100vw - 280px);
+        max-height: 80vh;
+        object-fit: relative;
+        left: -40;
+        display: none;
+    }
+
+    .log-section {
+        background-color: #222;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        height: 530px;
+        position: relative;
+        top: 100px;
+        left: 0;
+        width: 800px;
+        overflow-y: auto;
+    }
+
+    .log-section h3 {
+        color: white;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: white;
+    }
+
+    .log-table th, .log-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #444;
+    }
+
+    .log-table th {
+        background-color: #333;
+        position: sticky;
+        top: 0;
+    }
+
+    .log-table td {
+        background-color: #222;
+    }
+
+    .log-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .log-actions button {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .log-actions button:hover {
+        filter: brightness(1.1);
+    }
+
+    @media (max-width: 1024px) {
+        .container {
+            grid-template-columns: 1fr;
+            margin-left: 0;
+            padding: 10px;
+        }
+        .log-section {
+            width: 100%;
+            max-height: 300px;
+            margin-top: 20px;
+            height: 550px;
+            position: relative;
+            top: 0px;
+            left: 0;
+            overflow-y: auto;
+        }
+        #detected-video {
+            width: 100%;
+            height: auto;
+            max-width: calc(100vw - 20px);
+            max-height: 50vh;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="video-section">
+        <h3>{{ language['event_history'] }}</h3>
+    </div>
+
+    <div class="log-section">
+        <h3>{{ language['camera_detection_log'] }}</h3>
+        <table class="log-table" id="log-table">
+            <thead>
+                <tr>
+                    <th>{{ language['time'] }}</th>
+                    <th>{{ language['behavior'] }}</th>
+                    <th>{{ language['camera_id'] }}</th>
+                    <th>{{ language['accuracy'] }}</th>
+                </tr>
+            </thead>
+            <tbody id="log-body">
+                <!-- Dữ liệu log sẽ được thêm bằng JavaScript từ backend -->
+            </tbody>
+        </table>
+        <div class="log-actions">
+            <button onclick="saveLogToExcel()" style="background-color: #4caf50;">{{ language['save_log_to_excel'] }}</button>
+            <button onclick="clearLog()" style="background-color: #f44336;">{{ language['clear_log'] }}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const logBody = document.getElementById("log-body");
+
+    // Hàm lấy dữ liệu log từ backend
+    function fetchBehaviorLog() {
+        fetch('/get_behavior_log')
+            .then(response => response.json())
+            .then(data => {
+                logBody.innerHTML = ''; // Xóa dữ liệu cũ
+                const hazardousLogs = data.filter(log => ['Falling', 'Laying down'].includes(log.behavior));
+                if (hazardousLogs.length === 0) {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td colspan="4">{{ language['no_hazardous'] }}</td>`;
+                    logBody.appendChild(row);
+                } else {
+                    hazardousLogs.forEach(log => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${log.time}</td>
+                            <td>${log.behavior}</td>
+                            <td>${log.cameraId || '1'}</td>
+                            <td>${log.accuracy || 'N/A'}</td>
+                        `;
+                        logBody.appendChild(row);
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching behavior log:', error));
+    }
+
+    // Cập nhật log khi trang load
+    window.onload = function() {
+        fetchBehaviorLog();
+        // Cập nhật log mỗi 5 giây
+        setInterval(fetchBehaviorLog, 5000);
+    };
+
+    // Lưu log thành file Excel
+    function saveLogToExcel() {
+        fetch('/get_behavior_log')
+            .then(response => response.json())
+            .then(data => {
+                const hazardousLogs = data.filter(log => ['Falling', 'Laying down'].includes(log.behavior));
+                if (hazardousLogs.length === 0) {
+                    alert("{{ language['no_log_data'] }}");
+                    return;
+                }
+
+                const exportData = hazardousLogs.map(log => ({
+                    Time: log.time,
+                    Behavior: log.behavior,
+                    "Camera ID": log.cameraId || '1',
+                    Accuracy: log.accuracy || 'N/A'
+                }));
+
+                const workbook = XLSX.utils.book_new();
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                XLSX.utils.book_append_sheet(workbook, worksheet, "{{ language['camera_detection_log'] }}");
+                XLSX.writeFile(workbook, "camera_hazard_log.xlsx");
+            })
+            .catch(error => console.error('Error exporting log to Excel:', error));
+    }
+
+    // Xóa log
+    function clearLog() {
+        fetch('/clear_behavior_log', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    logBody.innerHTML = '';
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td colspan="4">{{ language['no_hazardous'] }}</td>`;
+                    logBody.appendChild(row);
+                }
+            })
+            .catch(error => console.error('Error clearing log:', error));
+    }
+</script>
+
+<!-- Thêm thư viện SheetJS để xuất Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+{% endblock %}
